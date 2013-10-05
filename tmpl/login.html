@@ -1,0 +1,16 @@
+{{template "header.html" .Meta}}
+<form action="" method="post">
+{{with .Error}}
+<div class="alert alert-error">
+<button type="button" class="close" data-dismiss="alert">&times;</button>
+{{.}}
+</div>
+{{end}}
+<input type="text" id="user" name="user" placeholder="Username" class="input-block-level" value="{{.User}}">
+<input type="password" id="pass" name="pass" placeholder="Password" class="input-block-level" value="">
+<div class="form-actions">
+<button type="submit" class="btn btn-primary">Log in</button>
+</div>
+<pre>{{printf "%#v" .}}</pre>
+</form>
+{{template "footer.html" .Meta}}
