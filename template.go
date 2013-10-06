@@ -12,6 +12,7 @@ import (
 var tmpl = template.Must(template.ParseGlob("tmpl/*.html"))
 
 type TmplMeta struct {
+	SiteTitle   string
 	URL         string
 	LoggedIn    *User
 	IsLoginPage bool
@@ -36,6 +37,9 @@ type TmplRegister struct {
 
 func GetTmplMeta(r *http.Request) *TmplMeta {
 	m := &TmplMeta{}
+	if err := Bucket.Get("meta/siteTitle", &m.SiteTitle); err != nil {
+		m.SiteTitle = "Forum"
+	}
 	m.URL = r.URL.String()
 	m.LoggedIn, _ = UserByCookie(r)
 	return m
