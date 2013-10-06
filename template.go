@@ -58,6 +58,8 @@ func init() {
 		})
 	})
 
+	http.Handle("/favicon.ico", http.RedirectHandler("/static/favicon.ico", http.StatusMovedPermanently))
+
 	fs := http.FileServer(http.Dir("tmpl/"))
 	http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		// forbid directory indexes
