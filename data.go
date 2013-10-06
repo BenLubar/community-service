@@ -29,6 +29,9 @@ type User struct {
 	Email     string
 	Password  []byte
 
+	Registered time.Time
+	LastVisit  time.Time
+
 	DisplayName string
 	Tagline     string
 }

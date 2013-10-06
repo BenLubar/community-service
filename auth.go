@@ -127,6 +127,12 @@ func UserByCookie(r *http.Request) (*User, error) {
 	if !u.CheckAuthCookie(r) {
 		return nil, ErrInvalidCookie
 	}
+
+	// don't DoS the database by visiting pages as a logged-in user
+	if time.Since(u.LastVisit) > time.Minute {
+		u.LastVisit = time.Now()
+		Bucket.Set("user@"+strconv.FormatUint(u.ID, 10), 0, u)
+	}
 	return u, nil
 }
 

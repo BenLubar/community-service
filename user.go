@@ -65,6 +65,7 @@ func NewUser(username, email string, password []byte) (uint64, error, bool) {
 		DisplayName: username,
 		LoginName:   username,
 		Password:    pass,
+		Registered:  time.Now(),
 	}
 
 	err = Bucket.Set(userIDKey, 0, user)
@@ -79,12 +80,24 @@ func NewUser(username, email string, password []byte) (uint64, error, bool) {
 	return id, nil, false
 }
 
+func (u *User) update() {
+	dirty := false
+	if u.Registered.IsZero() {
+		u.Registered = time.Now()
+		dirty = true
+	}
+	if dirty {
+		Bucket.Set("user@"+strconv.FormatUint(u.ID, 10), 0, u)
+	}
+}
+
 func UserByID(id uint64) (*User, error) {
 	u := new(User)
 	err := Bucket.Get("user@"+strconv.FormatUint(id, 10), u)
 	if err != nil {
 		return nil, err
 	}
+	u.update()
 	return u, nil
 }
 
