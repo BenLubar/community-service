@@ -4,16 +4,24 @@ import (
 	"github.com/couchbaselabs/go-couchbase"
 )
 
-const ViewRevision = 1
+const ViewRevision = 2
 
 const (
 	DDocName       = "commserv"
+	ViewForums     = "forums"
 	ViewForumTopic = "forum_topic"
 )
 
 var views = couchbase.DDocJSON{
 	"javascript",
 	map[string]couchbase.ViewDefinition{
+		ViewForums: {
+			Map: `function(doc, meta) {
+	if (meta.id.match(/^forum@\d+/)) {
+		emit(doc.ID, null);
+	}
+}`,
+		},
 		ViewForumTopic: {
 			Map: `function(doc, meta) {
 	if (meta.id.match(/^topic@\d+/)) {

@@ -1,4 +1,9 @@
-{{template "header.html" .Meta}}
+{{template "header.html" (.Meta.SetTitle .Forum.Name)}}
+<ul class="breadcrumb">
+<li><a href="/">{{.Meta.SiteTitle}}</a> <span class="divider">/</span></li>
+<li><a href="/f/{{.Forum.ID}}">{{.Forum.Name}}</a></li>
+</ul>
+
 <div class="row">
 <div class="span9">{{/* main content */}}
 {{if .Topics}}

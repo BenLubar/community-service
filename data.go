@@ -2,6 +2,11 @@ package main
 
 import "time"
 
+type Forum struct {
+	ID   uint64 `json:",string"` // unique identity
+	Name string
+}
+
 type Topic struct {
 	ID    uint64 `json:",string"` // unique identity
 	Forum uint64 `json:",string"` // -> Forum.ID

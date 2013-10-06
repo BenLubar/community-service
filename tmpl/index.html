@@ -1,2 +1,33 @@
 {{template "header.html" .Meta}}
+<ul class="breadcrumb">
+<li><a href="/">{{.Meta.SiteTitle}}</a></li>
+</ul>
+
+<div class="row">
+<div class="span9">{{/* main content */}}
+<h2>Forums</h2>
+
+{{if .Forums}}
+<table class="table">
+<thead>
+<tr>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+{{range .Forums}}
+<tr>
+<td><a href="/f/{{.ID}}">{{.Name}}</a></td>
+</tr>
+{{end}}
+</tbody>
+</table>
+{{else}}
+<div class="alert">There are no forums.</div>
+{{end}}
+</div>
+<div class="span3">{{/* sidebar */}}
+
+</div>
+</div>
 {{template "footer.html" .Meta}}

@@ -1,4 +1,9 @@
-{{template "header.html" .Meta}}
+{{template "header.html" (.Meta.SetTitle "Log in")}}
+<ul class="breadcrumb">
+<li><a href="/">{{.Meta.SiteTitle}}</a> <span class="divider">/</span></li>
+<li><a href="{{.URL}}">Log in</a></li>
+</ul>
+
 <form action="" method="post">
 {{with .Error}}
 <div class="alert alert-error">

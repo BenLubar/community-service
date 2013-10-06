@@ -24,13 +24,15 @@ var tmpl = template.Must(template.New("").Funcs(template.FuncMap{
 
 type TmplMeta struct {
 	SiteTitle   string
+	Title       string
 	URL         string
 	LoggedIn    *User
 	IsLoginPage bool
 }
 
 type TmplIndex struct {
-	Meta *TmplMeta
+	Meta   *TmplMeta
+	Forums []*Forum
 }
 
 type TmplLogin struct {
@@ -47,8 +49,8 @@ type TmplRegister struct {
 }
 
 type TmplForum struct {
-	Meta *TmplMeta
-	// TODO: Forum *Forum
+	Meta   *TmplMeta
+	Forum  *Forum
 	Topics []*Topic
 }
 
@@ -59,6 +61,11 @@ func GetTmplMeta(r *http.Request) *TmplMeta {
 	}
 	m.URL = r.URL.String()
 	m.LoggedIn, _ = UserByCookie(r)
+	return m
+}
+
+func (m *TmplMeta) SetTitle(title string) *TmplMeta {
+	m.Title = title
 	return m
 }
 
@@ -75,17 +82,6 @@ func ShowTemplate(w http.ResponseWriter, r *http.Request, file string, data inte
 }
 
 func init() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-
-		ShowTemplate(w, r, "index.html", &TmplIndex{
-			Meta: GetTmplMeta(r),
-		})
-	})
-
 	http.Handle("/favicon.ico", http.RedirectHandler("/static/favicon.ico", http.StatusMovedPermanently))
 
 	fs := http.FileServer(http.Dir("tmpl/"))
