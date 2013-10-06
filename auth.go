@@ -131,7 +131,10 @@ func UserByCookie(r *http.Request) (*User, error) {
 	// don't DoS the database by visiting pages as a logged-in user
 	if time.Since(u.LastVisit) > time.Minute {
 		u.LastVisit = time.Now()
-		Bucket.Set("user@"+strconv.FormatUint(u.ID, 10), 0, u)
+		err := Bucket.Set("user@"+strconv.FormatUint(u.ID, 10), 0, u)
+		if err != nil {
+			log.Printf("unable to update LastVisit for user %d: %v", u.ID, err)
+		}
 	}
 	return u, nil
 }
