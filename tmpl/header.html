@@ -16,6 +16,7 @@
 {{if .LoggedIn}}
 <form action="/logout" method="post">
 Hello, <a href="/u/{{.LoggedIn.ID}}">{{.LoggedIn.DisplayName}}</a>!<br>
+<input type="hidden" name="logout_nonce" value="{{.LoggedIn.GenerateNonce "logout"}}">
 <button type="submit" class="btn btn-mini">Log out</button>
 </form>
 {{else}}

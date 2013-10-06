@@ -34,6 +34,18 @@ func GetTmplMeta(r *http.Request) *TmplMeta {
 	return m
 }
 
+func ShowTemplate(w http.ResponseWriter, r *http.Request, file string, data interface{}) {
+	w, gzipClose := maybeGzip(w, r)
+	defer gzipClose()
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	err := tmpl.ExecuteTemplate(w, file, data)
+	if err != nil {
+		log.Println(r.URL, err)
+	}
+}
+
 func init() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
@@ -41,62 +53,9 @@ func init() {
 			return
 		}
 
-		w, gzipClose := maybeGzip(w, r)
-		defer gzipClose()
-
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-		err := tmpl.ExecuteTemplate(w, "index.html", &TmplIndex{
+		ShowTemplate(w, r, "index.html", &TmplIndex{
 			Meta: GetTmplMeta(r),
 		})
-		if err != nil {
-			log.Println(r.URL, err)
-		}
-	})
-
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/login" {
-			http.NotFound(w, r)
-			return
-		}
-
-		signInError := ""
-		if r.Method == "POST" {
-			if _, err := UserByCookie(r); err == nil {
-				signInError = "You are already logged in."
-			} else if r.PostFormValue("user") == "" || r.PostFormValue("pass") == "" {
-				signInError = "All fields are required."
-			} else {
-				u, err := UserByLogin(r.PostFormValue("user"))
-				if err == nil && u.CheckPassword([]byte(r.PostFormValue("pass"))) == nil {
-					ref := r.FormValue("ref")
-					if len(ref) < 2 || ref[0] != '/' || ref[1] == '/' {
-						ref = "/"
-					}
-					u.SetAuthCookie(w, time.Hour*24*30)
-					http.Redirect(w, r, ref, http.StatusFound)
-					return
-				}
-
-				signInError = "Incorrect login information."
-			}
-		}
-
-		w, gzipClose := maybeGzip(w, r)
-		defer gzipClose()
-
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-		meta := GetTmplMeta(r)
-		meta.IsLoginPage = true
-		err := tmpl.ExecuteTemplate(w, "login.html", &TmplLogin{
-			Meta:  meta,
-			User:  r.PostFormValue("user"),
-			Error: signInError,
-		})
-		if err != nil {
-			log.Println(r.URL, err)
-		}
 	})
 
 	fs := http.FileServer(http.Dir("tmpl/"))
