@@ -1,0 +1,17 @@
+{{template "header.html" .Meta}}
+<form action="" method="post">
+{{with .Error}}
+<div class="alert alert-error">
+<button type="button" class="close" data-dismiss="alert">&times;</button>
+{{.}}
+</div>
+{{end}}
+<input type="text" id="user" name="user" placeholder="Username" class="input-block-level" value="{{.User}}">
+<input type="email" id="email" name="email" placeholder="Email" class="input-block-level" value="{{.Email}}">
+<input type="password" id="pass" name="pass" placeholder="Password" class="input-block-level" value="">
+<input type="password" id="pass2" name="pass2" placeholder="Password (again)" class="input-block-level" value="">
+<div class="form-actions">
+<button type="submit" class="btn btn-primary">Register</button>
+</div>
+</form>
+{{template "footer.html" .Meta}}

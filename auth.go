@@ -152,8 +152,11 @@ func init() {
 	})
 
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/login" {
-			http.NotFound(w, r)
+		meta := GetTmplMeta(r)
+		meta.IsLoginPage = true
+
+		if meta.LoggedIn != nil {
+			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 
@@ -165,6 +168,14 @@ func init() {
 			}
 		}
 
+		ShowTemplate(w, r, "login.html", &TmplLogin{
+			Meta:  meta,
+			User:  r.PostFormValue("user"),
+			Error: signInError,
+		})
+	})
+
+	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		meta := GetTmplMeta(r)
 		meta.IsLoginPage = true
 
@@ -173,19 +184,20 @@ func init() {
 			return
 		}
 
-		w, gzipClose := maybeGzip(w, r)
-		defer gzipClose()
+		registerError := ""
+		if r.Method == "POST" {
+			registerError = processRegister(w, r)
+			if registerError == "" {
+				return
+			}
+		}
 
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-		err := tmpl.ExecuteTemplate(w, "login.html", &TmplLogin{
+		ShowTemplate(w, r, "register.html", &TmplRegister{
 			Meta:  meta,
 			User:  r.PostFormValue("user"),
-			Error: signInError,
+			Email: r.PostFormValue("email"),
+			Error: registerError,
 		})
-		if err != nil {
-			log.Println(r.URL, err)
-		}
 	})
 }
 
@@ -200,6 +212,42 @@ func processLogin(w http.ResponseWriter, r *http.Request) string {
 	u, err := UserByLogin(r.PostFormValue("user"))
 	if err != nil || u.CheckPassword([]byte(r.PostFormValue("pass"))) != nil {
 		return "Incorrect login information."
+	}
+
+	ref := r.FormValue("ref")
+	if len(ref) < 2 || ref[0] != '/' || ref[1] == '/' {
+		ref = "/"
+	}
+	u.SetAuthCookie(w, time.Hour*24*30)
+	http.Redirect(w, r, ref, http.StatusFound)
+	return ""
+}
+
+func processRegister(w http.ResponseWriter, r *http.Request) string {
+	if _, err := UserByCookie(r); err == nil {
+		return "You are already logged in."
+	}
+	if r.PostFormValue("user") == "" || r.PostFormValue("email") == "" || r.PostFormValue("pass") == "" || r.PostFormValue("pass2") == "" {
+		return "All fields are required."
+	}
+
+	if r.PostFormValue("pass") != r.PostFormValue("pass2") {
+		return "Your password does not match."
+	}
+
+	id, err, showUserError := NewUser(r.PostFormValue("user"), r.PostFormValue("email"), []byte(r.PostFormValue("pass")))
+	if err != nil {
+		if showUserError {
+			return err.Error()
+		}
+		log.Println(r.URL, err)
+		return "There was an error."
+	}
+
+	u, err := UserByID(id)
+	if err != nil {
+		log.Println(r.URL, err)
+		return "There was an error."
 	}
 
 	ref := r.FormValue("ref")

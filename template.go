@@ -27,6 +27,13 @@ type TmplLogin struct {
 	Error string
 }
 
+type TmplRegister struct {
+	Meta  *TmplMeta
+	User  string
+	Email string
+	Error string
+}
+
 func GetTmplMeta(r *http.Request) *TmplMeta {
 	m := &TmplMeta{}
 	m.URL = r.URL.String()
