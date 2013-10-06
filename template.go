@@ -7,9 +7,20 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
-var tmpl = template.Must(template.ParseGlob("tmpl/*.html"))
+var tmpl = template.Must(template.New("").Funcs(template.FuncMap{
+	"User": UserByID,
+	"Comma": func(n interface{}) string {
+		if x, ok := n.(uint64); ok {
+			return humanize.Comma(int64(x))
+		}
+		return humanize.Comma(n.(int64))
+	},
+	"RelTime": humanize.Time,
+}).ParseGlob("tmpl/*.html"))
 
 type TmplMeta struct {
 	SiteTitle   string
@@ -33,6 +44,12 @@ type TmplRegister struct {
 	User  string
 	Email string
 	Error string
+}
+
+type TmplForum struct {
+	Meta *TmplMeta
+	// TODO: Forum *Forum
+	Topics []*Topic
 }
 
 func GetTmplMeta(r *http.Request) *TmplMeta {

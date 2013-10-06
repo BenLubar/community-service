@@ -24,6 +24,7 @@ func main() {
 	}
 
 	initAuth()
+	initViews()
 
 	log.Fatalf("http.Serve failed: %v", http.Serve(ln, nil))
 }
