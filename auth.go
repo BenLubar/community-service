@@ -165,13 +165,19 @@ func init() {
 			}
 		}
 
+		meta := GetTmplMeta(r)
+		meta.IsLoginPage = true
+
+		if meta.LoggedIn != nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
 		w, gzipClose := maybeGzip(w, r)
 		defer gzipClose()
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		meta := GetTmplMeta(r)
-		meta.IsLoginPage = true
 		err := tmpl.ExecuteTemplate(w, "login.html", &TmplLogin{
 			Meta:  meta,
 			User:  r.PostFormValue("user"),
