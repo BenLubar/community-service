@@ -43,6 +43,7 @@ type User struct {
 
 	Registered time.Time
 	LastVisit  time.Time
+	LastSeenIP string
 
 	DisplayName string
 	Tagline     string

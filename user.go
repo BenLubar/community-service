@@ -66,7 +66,7 @@ func NewUser(username, email string, password []byte) (uint64, error, bool) {
 		DisplayName: username,
 		LoginName:   username,
 		Password:    pass,
-		Registered:  time.Now(),
+		Registered:  time.Now().UTC(),
 	}
 
 	err = Bucket.Set(userIDKey, 0, user)
@@ -85,6 +85,10 @@ func (u *User) update() {
 	dirty := false
 	if u.Registered.IsZero() {
 		u.Registered = time.Now()
+		dirty = true
+	}
+	if u.Registered.UTC() != u.Registered {
+		u.Registered = u.Registered.UTC()
 		dirty = true
 	}
 	if dirty {

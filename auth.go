@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -130,8 +131,14 @@ func UserByCookie(r *http.Request) (*User, error) {
 
 	// don't DoS the database by visiting pages as a logged-in user
 	if time.Since(u.LastVisit) > time.Minute {
-		u.LastVisit = time.Now()
-		err := Bucket.Set("user@"+strconv.FormatUint(u.ID, 10), 0, u)
+		u.LastVisit = time.Now().UTC()
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err == nil {
+			u.LastSeenIP = host
+		} else {
+			log.Printf("unable to update LastSeenIP for user %d: %v", u.ID, err)
+		}
+		err = Bucket.Set("user@"+strconv.FormatUint(u.ID, 10), 0, u)
 		if err != nil {
 			log.Printf("unable to update LastVisit for user %d: %v", u.ID, err)
 		}
