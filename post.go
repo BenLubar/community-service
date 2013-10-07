@@ -4,6 +4,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"sync"
+	"time"
 )
 
 func PostByID(id uint64) (*Post, error) {
@@ -13,6 +16,111 @@ func PostByID(id uint64) (*Post, error) {
 		return nil, err
 	}
 	return p, nil
+}
+
+var postLock sync.Mutex
+
+func NewPost(author *User, replyTo *Post, title, content string, tags []string) (uint64, error) {
+	if title == "" {
+		title = replyTo.Title
+		if !strings.HasPrefix(title, "Re: ") {
+			title = "Re: " + title
+		}
+	}
+
+	// easier and cheaper than trying to do compare-and-set on topics.
+	postLock.Lock()
+	defer postLock.Unlock()
+
+	topic, err := TopicByID(replyTo.Topic)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := Bucket.Incr("incr/postID", 1, 1, 0)
+	if err != nil {
+		return 0, err
+	}
+
+	now := time.Now().UTC()
+
+	topic.LastAuthor = author.ID
+	topic.LastMod = now
+	topic.LastPost = now
+	topic.LastTitle = title
+	topic.Replies++
+
+	post := &Post{
+		ID:      id,
+		Topic:   topic.ID,
+		ReplyTo: replyTo.ID,
+		Author:  author.ID,
+		LastMod: now,
+		Created: now,
+		Title:   title,
+		Content: content,
+		Tags:    tags,
+	}
+
+	err = Bucket.Set("post@"+strconv.FormatUint(id, 10), 0, post)
+	if err != nil {
+		return 0, err
+	}
+	err = Bucket.Set("topic@"+strconv.FormatUint(topic.ID, 10), 0, topic)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func NewTopic(author *User, forum *Forum, title, content string, tags []string) (uint64, error) {
+	tid, err := Bucket.Incr("incr/topicID", 1, 1, 0)
+	if err != nil {
+		return 0, err
+	}
+
+	pid, err := Bucket.Incr("incr/postID", 1, 1, 0)
+	if err != nil {
+		return 0, err
+	}
+
+	now := time.Now().UTC()
+
+	topic := &Topic{
+		ID:          tid,
+		Forum:       forum.ID,
+		Created:     now,
+		LastPost:    now,
+		LastMod:     now,
+		FirstTitle:  title,
+		LastTitle:   title,
+		FirstAuthor: author.ID,
+		LastAuthor:  author.ID,
+	}
+
+	post := &Post{
+		ID:      pid,
+		Topic:   tid,
+		ReplyTo: 0,
+		Author:  author.ID,
+		LastMod: now,
+		Created: now,
+		Title:   title,
+		Content: content,
+		Tags:    tags,
+	}
+
+	err = Bucket.Set("post@"+strconv.FormatUint(pid, 10), 0, post)
+	if err != nil {
+		return 0, err
+	}
+	err = Bucket.Set("topic@"+strconv.FormatUint(tid, 10), 0, topic)
+	if err != nil {
+		return 0, err
+	}
+
+	return tid, nil
 }
 
 func init() {
