@@ -1,0 +1,23 @@
+{{template "header.html" (.Meta.SetTitle .Topic.FirstTitle)}}
+<ul class="breadcrumb">
+<li><a href="/">{{.Meta.SiteTitle}}</a> <span class="divider">/</span></li>
+<li><a href="/f/{{.Forum.ID}}">{{.Forum.Name}}</a> <span class="divider">/</span></li>
+<li><a href="/t/{{.Topic.ID}}">{{.Topic.FirstTitle}}</a></li>
+</ul>
+
+<div class="row">
+<div class="span9">{{/* main content */}}
+{{if .Posts}}
+{{range .Posts}}
+{{template "post_include.html" .}}
+{{end}}
+{{else}}
+<div class="alert">There are no posts to display.</div>
+<meta name="robots" content="noindex">
+{{end}}
+</div>
+<div class="span3">{{/* sidebar */}}
+
+</div>
+</div>
+{{template "footer.html" .Meta}}

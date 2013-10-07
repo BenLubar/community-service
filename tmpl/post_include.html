@@ -1,0 +1,14 @@
+<div class="row" id="p{{.ID}}">
+<div class="span2 text-center">
+{{with $author := (User .Author)}}
+<img src="//www.gravatar.com/avatar/{{MD5 ($author.Email)}}?s=128" width="128" height="128" alt=""><br>
+<b>{{$author.DisplayName}}</b>
+{{end}}
+</div>
+<div class="span7">
+<span class="pull-right"><a href="/p/{{.ID}}">{{.ID}}</a>{{if .ReplyTo}} in reply to <a href="/p/{{.ReplyTo}}">.ReplyTo</a>{{end}}</span>
+<h3>{{.Title}}</h3>
+<pre>{{.Content}}</pre>
+<p>{{range $i, $tag := .Tags}}{{if $i}}, {{else}}Filed under: {{end}}<a href="/tag/{{.}}">{{.}}</a>{{end}}</p>
+</div>
+</div>

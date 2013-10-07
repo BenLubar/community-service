@@ -181,7 +181,7 @@ func init() {
 			Meta:  meta,
 			User:  r.PostFormValue("user"),
 			Error: signInError,
-		})
+		}, http.StatusOK)
 	})
 
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
@@ -206,7 +206,7 @@ func init() {
 			User:  r.PostFormValue("user"),
 			Email: r.PostFormValue("email"),
 			Error: registerError,
-		})
+		}, http.StatusOK)
 	})
 }
 

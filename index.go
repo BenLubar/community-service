@@ -36,6 +36,6 @@ func init() {
 		ShowTemplate(w, r, "index.html", &TmplIndex{
 			Meta:   GetTmplMeta(r),
 			Forums: forums,
-		})
+		}, http.StatusOK)
 	})
 }

@@ -4,12 +4,13 @@ import (
 	"github.com/couchbaselabs/go-couchbase"
 )
 
-const ViewRevision = 2
+const ViewRevision = 3
 
 const (
 	DDocName       = "commserv"
 	ViewForums     = "forums"
 	ViewForumTopic = "forum_topic"
+	ViewTopicPost  = "topic_post"
 )
 
 var views = couchbase.DDocJSON{
@@ -26,6 +27,13 @@ var views = couchbase.DDocJSON{
 			Map: `function(doc, meta) {
 	if (meta.id.match(/^topic@\d+/)) {
 		emit([doc.Forum].concat(dateToArray(doc.LastMod)), null);
+	}
+}`,
+		},
+		ViewTopicPost: {
+			Map: `function(doc, meta) {
+	if (meta.id.match(/^post@\d+/)) {
+		emit([doc.Topic].concat(dateToArray(doc.Created)), null);
 	}
 }`,
 		},

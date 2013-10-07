@@ -61,6 +61,13 @@ type TmplForum struct {
 	Topics []*Topic
 }
 
+type TmplTopic struct {
+	Meta  *TmplMeta
+	Forum *Forum
+	Topic *Topic
+	Posts []*Post
+}
+
 func GetTmplMeta(r *http.Request) *TmplMeta {
 	m := &TmplMeta{}
 	if err := Bucket.Get("meta/siteTitle", &m.SiteTitle); err != nil {
@@ -76,11 +83,13 @@ func (m *TmplMeta) SetTitle(title string) *TmplMeta {
 	return m
 }
 
-func ShowTemplate(w http.ResponseWriter, r *http.Request, file string, data interface{}) {
+func ShowTemplate(w http.ResponseWriter, r *http.Request, file string, data interface{}, status int) {
 	w, gzipClose := maybeGzip(w, r)
 	defer gzipClose()
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	w.WriteHeader(status)
 
 	err := tmpl.ExecuteTemplate(w, file, data)
 	if err != nil {

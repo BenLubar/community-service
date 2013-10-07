@@ -59,6 +59,6 @@ func init() {
 			Meta:   GetTmplMeta(r),
 			Forum:  forum,
 			Topics: topics,
-		})
+		}, http.StatusOK)
 	})
 }
