@@ -21,12 +21,12 @@
 {{range .Topics}}
 <tr>
 <td><a href="/t/{{.ID}}">{{.FirstTitle}}</a></td>
-<td><a href="/u/{{.FirstAuthor}}"><img src="//www.gravatar.com/avatar/{{MD5 ((User .FirstAuthor).Email)}}?s=16" width="16" height="16" alt=""> {{(User .FirstAuthor).DisplayName}}</a></td>
+<td><a href="/u/{{.FirstAuthor}}"><img src="//www.gravatar.com/avatar/{{MD5 (ToLower ((User .FirstAuthor).Email))}}?s=16" width="16" height="16" alt=""> {{(User .FirstAuthor).DisplayName}}</a></td>
 <td title="{{.Created.UTC.Format "2006-01-02 15:04:05"}}">{{RelTime .Created}}</td>
 <td>{{Comma .Replies}}</td>
 {{if .Replies}}
 <td title="{{.LastPost.UTC.Format "2006-01-02 15:04:05"}}">{{RelTime .LastPost}}</a> by
-<a href="/u/{{.LastAuthor}}"><img src="//www.gravatar.com/avatar/{{MD5 ((User .LastAuthor).Email)}}?s=16" width="16" height="16" alt=""> {{(User .LastAuthor).DisplayName}}</a></td>
+<a href="/u/{{.LastAuthor}}"><img src="//www.gravatar.com/avatar/{{MD5 (ToLower ((User .LastAuthor).Email))}}?s=16" width="16" height="16" alt=""> {{(User .LastAuthor).DisplayName}}</a></td>
 {{else}}
 <td class="muted">-</td>
 {{end}}

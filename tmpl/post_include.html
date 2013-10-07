@@ -1,7 +1,7 @@
 <div class="row" id="p{{.ID}}">
 <div class="span2 text-center">
 {{with $author := (User .Author)}}
-<img src="//www.gravatar.com/avatar/{{MD5 ($author.Email)}}?s=128" width="128" height="128" alt=""><br>
+<img src="//www.gravatar.com/avatar/{{MD5 (ToLower ($author.Email))}}?s=128" width="128" height="128" alt=""><br>
 <b>{{$author.DisplayName}}</b>
 {{end}}
 </div>

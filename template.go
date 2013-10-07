@@ -27,6 +27,8 @@ var tmpl = template.Must(template.New("").Funcs(template.FuncMap{
 		hash.Write([]byte(s))
 		return hex.EncodeToString(hash.Sum(nil))
 	},
+	"ToLower": strings.ToLower,
+	"ToUpper": strings.ToUpper,
 }).ParseGlob("tmpl/*.html"))
 
 type TmplMeta struct {
