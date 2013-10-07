@@ -2,6 +2,8 @@ package main
 
 import (
 	"compress/gzip"
+	"crypto/md5"
+	"encoding/hex"
 	"html/template"
 	"log"
 	"net/http"
@@ -20,6 +22,11 @@ var tmpl = template.Must(template.New("").Funcs(template.FuncMap{
 		return humanize.Comma(n.(int64))
 	},
 	"RelTime": humanize.Time,
+	"MD5": func(s string) string {
+		hash := md5.New()
+		hash.Write([]byte(s))
+		return hex.EncodeToString(hash.Sum(nil))
+	},
 }).ParseGlob("tmpl/*.html"))
 
 type TmplMeta struct {
